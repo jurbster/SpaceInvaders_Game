@@ -41,16 +41,31 @@ class Player(pygame.sprite.Sprite):
 
         #Add shooting for player when spacebar is pressed
         #Need to implement - spacebar pressed does work tho
-        if pressed_keys[K_SPACE]:
-            self.rect.move_ip(-5, 0)
+        #if pressed_keys[K_SPACE]:
+           # self.rect.move_ip(-5, 0)
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+
+        self.image = pygame.Surface([4, 10])
+        self.image.fill((255, 255, 255))
+
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        self.rect.y -= 3
+
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self): #add x,y to add multiple later
         super(Enemy, self).__init__()
         self.surf = pygame.image.load("enemy3.png").convert()
         self.surf = pygame.transform.scale(self.surf, (60, 60))
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center = (screenWidth/2, screenHeight/2))
+        #self.rect = self.surf.get_rect()
+        #self.rect.center[x, y]
 
 
 #Set up the game window.
@@ -65,6 +80,21 @@ enemy = Enemy()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player, enemy)
 
+bullet_group = pygame.sprite.Group()
+#alien_group = pygame.sprite.Group()
+
+#Keep getting this error if I try this way to add enemies
+#TypeError: tuple indices must be integers or slices, not tuple
+"""
+def addEnemies():
+    for rows in range(5):
+        for item in range(5):
+            enemy = Enemy(100, 70)
+            alien_group.add(enemy)
+
+addEnemies()
+"""
+
 #Variable that keeps the main loop running
 running = True
 
@@ -77,17 +107,29 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == KEYDOWN:
+        elif event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
+
+        elif event.type == K_SPACE:
+            bullet = Bullet()
+            bullet.rect.x = player.rect.x
+            bullet.rect.y = player.rect.y
+
+            all_sprites.add(bullet)
+            bullet_group.add(bullet)
 
     #Detect keys pressed by user
     pressed_keys = pygame.key.get_pressed()
 
     player.update(pressed_keys)
 
+    #Add background image
+    background = pygame.image.load('space.jpg')
+    background = pygame.transform.scale(background, (800, 600))
+
     #Fill the screen with black.
-    screen.fill((0, 0, 0))
+    screen.blit(background, (0, 0))
 
     #Draw all the sprites to screen
     for entity in all_sprites:
